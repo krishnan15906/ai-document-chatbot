@@ -1,0 +1,84 @@
+Created At: 2026-06-24T05:05:55Z
+Completed At: 2026-06-24T05:05:56Z
+File Path: `file:///c:/Users/Krishna%20patel/Desktop/ai-document-chatbot/ai-document-chatbot/backend/utils/pdf_chat.py`
+Total Lines: 334
+Total Bytes: 14177
+Showing lines 1 to 334
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: """Page-aware PDF chatbot engine.
+2: 
+3: Answers questions using page-level text data so it can:
+4: - Tell the user which page a topic appears on
+5: - Summarize specific pages
+6: - Search across pages and cite page numbers
+7: - Handle general questions about document content
+8: """
+9: 
+10: import re
+11: from typing import List, Dict
+12: 
+13: 
+14: # Common stop words to ignore during keyword matching
+15: STOP_WORDS = {
+16:     "the", "is", "a", "an", "of", "and", "or", "in", "on", "at", "to",
+17:     "for", "it", "be", "as", "do", "by", "this", "that", "with", "from",
+18:     "are", "was", "were", "been", "has", "have", "had", "will", "would",
+19:     "can", "could", "may", "might", "shall", "should", "not", "no",
+20:     "what", "which", "who", "whom", "where", "when", "how", "why",
+21:     "me", "my", "i", "you", "your", "we", "our", "they", "their",
+22:     "about", "tell", "give", "find", "show", "page", "number", "numbers",
+23:     "does", "did", "do", "please", "any", "topic", "section", "chapter",
+24:     "info", "information", "details", "content", "contents", "say", "says",
+25:     "read", "show", "get", "view", "mention", "mentioned", "write", "written",
+26:     "locate", "located", "found", "find", "describe", "described", "explain",
+27:     "explained", "discuss", "discussed", "exist", "exists", "existential",
+28: }
+29: 
+30: 
+31: def _extract_keywords(text: str) -> set:
+32:     """Extract meaningful keywords from text, ignoring stop words and numbers."""
+33:     words = re.findall(r"\b[a-zA-Z]{2,}\b", text.lower())
+34: 
+<truncated 12215 bytes>
+  
+295:         page_refs = [f"**Page {p['page']}**" for p in match_pages[:5]]
+296:         topic_words = ", ".join(sorted(keywords)[:5])
+297: 
+298:         if len(match_pages) == 1:
+299:             page = match_pages[0]
+300:             relevant = _find_relevant_sentences(page["text"], keywords, 3)
+301:             answer = f"📍 Information about *{topic_words}* is found on **Page {page['page']}**."
+302:             if relevant:
+303:                 answer += "\n\n**Key Section:**\n> " + "\n> ".join(_clean_text(s) for s in relevant)
+304:             return answer
+305:         else:
+306:             answer = f"📍 Information about *{topic_words}* is found on: {', '.join(page_refs)}."
+307:             snippets = []
+308:             for p in match_pages[:2]:
+309:                 relevant = _find_relevant_sentences(p["text"], keywords, 2)
+310:                 if relevant:
+311:                     snippets.append(f"**From Page {p['page']}:**\n> " + "\n> ".join(_clean_text(s) for s in relevant))
+312:             if snippets:
+313:                 answer += "\n\n" + "\n\n".join(snippets)
+314:             return answer
+315: 
+316:     # --- General question: return relevant content with page references ---
+317:     results = []
+318:     for score, p in scored_pages[:3]:
+319:         relevant_sentences = _find_relevant_sentences(p["text"], keywords, 3)
+320:         if relevant_sentences:
+321:             content = " ".join(_clean_text(s) for s in relevant_sentences)
+322:             results.append(f"📄 **Page {p['page']}:**\n{content}")
+323: 
+324:     if results:
+325:         return "\n\n".join(results)
+326: 
+327:     # Fallback: return first 300 chars from best matching page
+328:     best = scored_pages[0][1]
+329:     cleaned_best = _clean_text(best["text"])
+330:     snippet = cleaned_best[:300].strip()
+331:     if len(cleaned_best) > 300:
+332:         snippet += "..."
+333:     return f"📄 **Page {best['page']}:**\n{snippet}"
+334: 
+The above content shows the entire, complete file contents of the requested file.
